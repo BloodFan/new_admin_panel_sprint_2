@@ -2,41 +2,41 @@ FROM python:3.12-alpine
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    UWSGI_PROCESSES=1 \
-    UWSGI_THREADS=16 \
-    UWSGI_HARAKIRI=240 \
     DJANGO_SETTINGS_MODULE='example.settings' \
     APP_HOME=/opt/app
 
-WORKDIR $APP_HOME
 
 ARG GID=1000
 ARG UID=1000
 ARG USER=ubuntu
 
-COPY ./app $APP_HOME
-# COPY ./data $APP_HOME
-
-RUN apk add --update --no-cache python3-dev postgresql-dev curl nginx \
-    build-base musl-dev linux-headers openssl libffi-dev uwsgi-python3 libc-dev pcre-dev && \
+RUN apk add --update --no-cache python3-dev postgresql-dev curl nginx && \
     addgroup -g $GID -S $USER && \
     adduser -S $USER -G $USER --uid "$UID" && \
-    mkdir -p /uwsgi_socket $APP_HOME/static $APP_HOME/media && \
-    chmod -R 777 /uwsgi_socket $APP_HOME/static $APP_HOME/media && \
-    chown -R $USER:$USER /uwsgi_socket $APP_HOME
+    mkdir -p /gunicorn_socket && \
+    chmod -R 755 /gunicorn_socket && \
+    chown -R $USER:$USER /gunicorn_socket
 
-ENV UWSGI_PROFILE=core
+WORKDIR $APP_HOME
+
+COPY --chown=$USER:$USER ./docker/dev/app/entrypoints/entrypoint.sh /
+COPY ./docker/dev/nginx/conf.d /etc/nginx/conf.d
+COPY ./docker/dev/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY ./app $APP_HOME
 
 RUN pip install --upgrade pip setuptools && \
-    pip install -r requirements.txt && \
+    pip install --editable .[dev]
+
+
+RUN chmod +x /*.sh && \
+    mkdir -p media && \
     python manage.py collectstatic --no-input && \
+    chown -R $USER:$USER $APP_HOME media && \
     chown -R $USER:$USER /etc/nginx /var/lib/nginx/ /var/log /run/nginx/
 
-COPY ["./docker/dev/uwsgi/run_uwsgi.sh", "./docker/dev/uwsgi/conf/uwsgi.ini", "./docker/dev/app/entrypoints/entrypoint.sh", "/"]
-
-RUN chmod +x /*.sh
-
 ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["gunicorn", "example.asgi:application"]
 
 EXPOSE 8000
 

@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: docker/dev/app/Dockerfile
     volumes:
-      - ./app/:/opt/app/
+      # - ./app/:/opt/app/
       - postgres_socket:/postgres_socket
       - media:/opt/app/media/
     depends_on: [db, ]
@@ -19,29 +19,15 @@ services:
     networks:
       - theatre_network
 
-  # nginx:
-  #   image: nginx:latest
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
-  #     - ./configs:/etc/nginx/conf.d:ro
-  #   depends_on:
-  #     - service
-  #   ports:
-  #     - "80:80"
-
   db:
     image: postgres:15.1-alpine
-    # command: ["-c", "config_file=/etc/postgresql/postgresql.conf"]
     volumes:
       - ./database_dump.sql:/docker-entrypoint-initdb.d/init.sql
-      # - ./docker/dev/db/pg.conf:/etc/postgresql/postgresql.conf
       - postgres_data:/var/lib/postgresql/data/
       - postgres_socket:/var/run/postgresql/
     env_file:
       - docker/dev/env/.db.env
     restart: always
-    # ports:
-    #   - "5432:5432"
     networks:
       - theatre_network
 
