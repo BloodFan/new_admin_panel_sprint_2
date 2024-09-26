@@ -13,6 +13,10 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = int(os.environ.get("DEBUG", 1))
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+]
+CORS_ORIGIN_ALLOW_ALL = True
 
 ALLOWED_HOSTS: list = (
     ["*"] if DEBUG else os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
