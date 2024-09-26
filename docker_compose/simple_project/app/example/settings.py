@@ -1,101 +1,95 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
+from split_settings.tools import include
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'secret_key')
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://127.0.0.1:8000/")
+
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "folaskdfjYHLHhjlhljkh7678yhlkjgkfkfgkjo"
+)
+
+DEBUG = int(os.environ.get("DEBUG", 1))
 
 
-DEBUG = os.getenv('DEBUG', False) == 'True'
+ALLOWED_HOSTS: list = (
+    ["*"] if DEBUG else os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
-
-CSRF_TRUSTED_ORIGINS = ['http://localhost:8000',]
-CORS_ORIGIN_ALLOW_ALL = True
+INTERNAL_IPS: list[str] = []
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'movies',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 ]
+
+THIRD_PARTY_APPS = [
+    "rosetta",
+    "django_filters",
+    "rest_framework",
+    "drf_spectacular",
+]
+
+LOCAL_APPS = [
+    "movies.apps.MoviesConfig",
+]
+
+INSTALLED_APPS += THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
 ]
 
-ROOT_URLCONF = 'example.urls'
+ROOT_URLCONF = "example.urls"
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
-]
+include(
+    "components/templates.py",
+    "components/database.py",
+    "components/auth_password_validators.py",
+    "components/debug_toolbar_config.py",
+    "components/rest_framework.py",
+    "components/spectacular.py",
+    # "components/logging.py",
+)
 
-WSGI_APPLICATION = 'example.wsgi.application'
+WSGI_APPLICATION = "example.wsgi.application"
+ASGI_APPLICATION = "example.asgi.application"
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB'),
-        'USER': os.getenv('POSTGRES_USER'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-        'HOST': os.getenv('SQL_HOST', '127.0.0.1'),
-        'PORT': os.getenv('SQL_PORT', 5432),
-        'OPTIONS': {
-            'options': os.getenv('SQL_OPTIONS'),
-        },
-    }
-}
+LANGUAGE_CODE = "en-us"
 
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+LOCALE_PATHS = (os.path.join(BASE_DIR, "locale"),)
+
+LANGUAGES = (
+    ("en", "English"),
+    ("ru", "Russian"),
+)
+
+ROSETTA_SHOW_AT_ADMIN_PANEL = DEBUG
+
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

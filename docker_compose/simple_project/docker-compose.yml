@@ -4,7 +4,7 @@ services:
     hostname: theatre-app
     build:
       context: .
-      dockerfile: docker/dev/app/Dockerfile
+      dockerfile: docker/prod/app/Dockerfile
     volumes:
       # - ./app/:/opt/app/
       - postgres_socket:/postgres_socket
@@ -13,8 +13,9 @@ services:
     ports:
       - "8000:80"
     env_file:
-      - docker/dev/env/.db.env
-      - docker/dev/env/.env
+      - docker/prod/env/.db.env
+      - docker/prod/env/.env
+      - docker/prod/env/.gunicorn.env
     restart: unless-stopped
     networks:
       - theatre_network
@@ -26,7 +27,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
       - postgres_socket:/var/run/postgresql/
     env_file:
-      - docker/dev/env/.db.env
+      - docker/prod/env/.db.env
     restart: always
     networks:
       - theatre_network
