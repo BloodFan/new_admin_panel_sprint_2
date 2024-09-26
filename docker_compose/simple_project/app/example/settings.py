@@ -14,7 +14,8 @@ SECRET_KEY = os.environ.get(
 DEBUG = int(os.environ.get("DEBUG", 1))
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 
